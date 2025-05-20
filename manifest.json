@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "Boss直聘外包公司标记",
+  "version": "1.0",
+  "description": "在Boss直聘职位列表中标记外包公司",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://*.zhipin.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.svg",
+      "48": "images/icon48.svg",
+      "128": "images/icon128.svg"
+    }
+  },
+  "icons": {
+    "16": "images/icon16.svg",
+    "48": "images/icon48.svg",
+    "128": "images/icon128.svg"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.zhipin.com/web/geek/job*",
+        "*://*.zhipin.com/web/geek/chat*",
+        "*://*.zhipin.com/*/?ka=header-home"
+      ],
+      "js": ["content_script.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [ "config.json" ],
+      "matches": [ "*://*.zhipin.com/*" ]
+    }
+  ]
+}

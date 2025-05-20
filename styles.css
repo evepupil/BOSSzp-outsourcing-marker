@@ -1,0 +1,17 @@
+.outsourcing-tag {
+  background-color: #ff4d4f;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-left: 8px;
+  font-weight: bold;
+}
+
+/* You might want to adjust the positioning and appearance further */
+.job-card-wrapper .outsourcing-tag {
+  /* Example: If you want to position it absolutely within the card */
+  /* position: absolute; */
+  /* top: 10px; */
+  /* right: 10px; */
+}
