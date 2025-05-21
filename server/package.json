@@ -1,0 +1,25 @@
+{
+  "name": "outsourcing-companies-api",
+  "version": "1.0.0",
+  "description": "API for retrieving outsourcing companies list",
+  "main": "index.js",
+  "scripts": {
+    "start": "serverless offline start",
+    "deploy": "serverless deploy",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "serverless",
+    "aws",
+    "lambda",
+    "api"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "serverless": "^3.30.1",
+    "serverless-offline": "^12.0.4"
+  }
+} 

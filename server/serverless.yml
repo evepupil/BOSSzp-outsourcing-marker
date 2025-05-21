@@ -1,0 +1,43 @@
+service: outsourcing-companies-api
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: ap-east-1 # 亚太地区（香港）区域，可以根据需要更改
+  stage: ${opt:stage, 'dev'}
+  memorySize: 256
+  timeout: 10
+  environment:
+    NODE_ENV: ${opt:stage, 'dev'}
+  
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: arn:aws:logs:*:*:*
+
+functions:
+  getOutsourcingCompanies:
+    handler: index.getOutsourcingCompanies
+    events:
+      - http:
+          path: /companies
+          method: get
+          cors: true
+
+package:
+  patterns:
+    - 'index.js'
+    - 'outsourcing-companies.json'
+    - '!node_modules/**'
+    - '!.gitignore'
+    - '!.git/**'
+
+plugins:
+  - serverless-offline 

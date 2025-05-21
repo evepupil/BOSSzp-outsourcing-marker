@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Boss直聘外包公司标记",
+  "name": "Boss直聘助手",
   "version": "1.0",
   "description": "在Boss直聘职位列表中标记外包公司",
   "permissions": [
@@ -29,7 +29,9 @@
       "matches": [
         "*://*.zhipin.com/web/geek/job*",
         "*://*.zhipin.com/web/geek/chat*",
-        "*://*.zhipin.com/*/?ka=header-home"
+        "*://*.zhipin.com/*/?ka=header-home",
+        "*://*.zhipin.com/job_detail/*"
+        
       ],
       "js": ["content_script.js"],
       "css": ["styles.css"]
