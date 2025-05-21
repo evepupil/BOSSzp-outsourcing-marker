@@ -29,7 +29,9 @@
       "matches": [
         "*://*.zhipin.com/web/geek/job*",
         "*://*.zhipin.com/web/geek/chat*",
-        "*://*.zhipin.com/*/?ka=header-home"
+        "*://*.zhipin.com/*/?ka=header-home",
+        "*://*.zhipin.com/job_detail/*"
+        
       ],
       "js": ["content_script.js"],
       "css": ["styles.css"]
