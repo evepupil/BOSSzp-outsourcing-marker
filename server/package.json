@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "API for retrieving outsourcing companies list",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "start": "serverless offline start",
     "deploy": "serverless deploy",

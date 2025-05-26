@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // 获取外包公司名单的处理函数
 exports.getOutsourcingCompanies = async (event) => {
