@@ -7,8 +7,8 @@ let observer = null; // MutationObserver 实例
 // 异步函数：从 config.json 文件中获取外包公司列表
 async function fetchConfigInternal() {
   try {
-    // 使用 chrome.runtime.getURL 获取插件内文件的绝对路径
-    const response = await fetch(chrome.runtime.getURL('config.json'));
+    // 从服务器API获取外包公司列表
+    const response = await fetch('http://localhost:3000/api/outsourcing-companies');
     // 检查请求是否成功
     if (!response.ok) {
       console.error('获取 config.json 失败:', response.statusText);
