@@ -20,7 +20,7 @@
   "dependencies": {
   },
   "devDependencies": {
-    "serverless": "^3.30.1",
+    "serverless": "^3.28.1",
     "serverless-offline": "^13.3.2"
   }
 }
