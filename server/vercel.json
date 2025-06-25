@@ -10,10 +10,25 @@
         "Access-Control-Allow-Methods": "GET,OPTIONS",
         "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
       }
+    },
+    {
+      "src": "/add-company",
+      "dest": "/api/add-company",
+      "headers": {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST,OPTIONS",
+        "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
+      }
     }
+    
   ],
   "functions": {
     "api/companies.js": {
+      "memory": 256,
+      "maxDuration": 10
+    },
+    "api/add-company.js": {
       "memory": 256,
       "maxDuration": 10
     }
