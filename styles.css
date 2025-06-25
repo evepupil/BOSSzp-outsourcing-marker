@@ -8,6 +8,66 @@
   font-weight: bold;
 }
 
+/* 添加到外包列表按钮样式 */
+.add-outsourcing-btn {
+  position: relative;
+  top: -2px;
+  margin-left: 20px;
+  padding-left: 42px;
+  vertical-align: middle;
+  display: inline-block;
+  width: 86px;
+  height: 36px;
+  line-height: 36px;
+  background: #4d667a;
+  border-radius: 19px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all .2s linear;
+  box-sizing: border-box;
+}
+
+.add-outsourcing-btn:hover {
+  background-color: #4bc0b5;
+}
+
+.add-outsourcing-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* 提示消息样式 */
+#outsourcing-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  z-index: 10000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.toast-success {
+  background-color: #dff0d8;
+  color: #3c763d;
+  border: 1px solid #d6e9c6;
+}
+
+.toast-error {
+  background-color: #f2dede;
+  color: #a94442;
+  border: 1px solid #ebccd1;
+}
+
+.toast-info {
+  background-color: #d9edf7;
+  color: #31708f;
+  border: 1px solid #bce8f1;
+}
+
 /* You might want to adjust the positioning and appearance further */
 .job-card-wrapper .outsourcing-tag {
   /* Example: If you want to position it absolutely within the card */

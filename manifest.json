@@ -9,7 +9,8 @@
     "scripting"
   ],
   "host_permissions": [
-    "*://*.zhipin.com/*"
+    "*://*.zhipin.com/*",
+    "*://boss.chaosyn.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -30,8 +31,8 @@
         "*://*.zhipin.com/web/geek/job*",
         "*://*.zhipin.com/web/geek/chat*",
         "*://*.zhipin.com/*/?ka=header-home",
-        "*://*.zhipin.com/job_detail/*"
-        
+        "*://*.zhipin.com/job_detail/*",
+        "*://*.zhipin.com/gongsi/*"
       ],
       "js": ["content_script.js"],
       "css": ["styles.css"]
@@ -42,5 +43,8 @@
       "resources": [ "config.json" ],
       "matches": [ "*://*.zhipin.com/*" ]
     }
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://boss.chaosyn.com/"
+  }
 }
