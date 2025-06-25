@@ -110,5 +110,6 @@ npm run deploy
 ## 注意事项
 
 - Edge Config的`set`方法在某些环境中不可用，因此我们使用Vercel API进行数据写入
+- Vercel API的请求格式为：`https://api.vercel.com/v1/edge-config/{configId}/items`
 - 确保您的Edge Config Token具有足够的权限
 - 在生产环境中，应该添加适当的身份验证机制 

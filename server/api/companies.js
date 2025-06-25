@@ -50,11 +50,14 @@ export default async function handler(req, res) {
           const urlParts = configUrl.split('/');
           const configId = urlParts[urlParts.length - 1];
           
-          const response = await fetch(`https://edge-config.vercel.com/v1/items/${configId}?key=outsourcing_companies`, {
-            headers: {
-              'Authorization': `Bearer ${process.env.EDGE_CONFIG_TOKEN}`
+          const response = await fetch(
+            `https://api.vercel.com/v1/edge-config/${configId}/items?key=outsourcing_companies`,
+            {
+              headers: {
+                'Authorization': `Bearer ${process.env.EDGE_CONFIG_TOKEN}`
+              }
             }
-          });
+          );
           
           if (!response.ok) {
             throw new Error(`API请求失败: ${response.status}`);

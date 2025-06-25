@@ -49,11 +49,14 @@ async function initializeEdgeConfig() {
       // 尝试通过API获取
       try {
         console.log('尝试通过API获取现有列表...');
-        const getResponse = await fetch(`https://edge-config.vercel.com/v1/items/${configId}?key=outsourcing_companies`, {
-          headers: {
-            'Authorization': `Bearer ${process.env.EDGE_CONFIG_TOKEN}`
+        const getResponse = await fetch(
+          `https://api.vercel.com/v1/edge-config/${configId}/items?key=outsourcing_companies`,
+          {
+            headers: {
+              'Authorization': `Bearer ${process.env.EDGE_CONFIG_TOKEN}`
+            }
           }
-        });
+        );
         
         if (getResponse.ok) {
           const data = await getResponse.json();
@@ -94,23 +97,25 @@ async function initializeEdgeConfig() {
 
     // 通过Vercel API更新Edge Config
     console.log('通过API更新Edge Config...');
-    const response = await fetch(`https://edge-config.vercel.com/v1/items`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.EDGE_CONFIG_TOKEN}`,
-        'X-Edge-Config-Id': configId
-      },
-      body: JSON.stringify({
-        items: [
-          {
-            operation: 'update',
-            key: 'outsourcing_companies',
-            value: initialCompanies
-          }
-        ]
-      })
-    });
+    const response = await fetch(
+      `https://api.vercel.com/v1/edge-config/${configId}/items`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${process.env.EDGE_CONFIG_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          items: [
+            {
+              operation: 'update',
+              key: 'outsourcing_companies',
+              value: initialCompanies
+            }
+          ]
+        })
+      }
+    );
     
     if (!response.ok) {
       const errorText = await response.text();
