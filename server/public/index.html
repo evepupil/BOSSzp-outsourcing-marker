@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>外包公司API</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 40px;
+      color: #333;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #2c3e50;
+      margin-top: 0;
+    }
+    a {
+      color: #3498db;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .endpoint {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      border-left: 4px solid #3498db;
+    }
+    code {
+      background-color: #f1f1f1;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>外包公司API</h1>
+    <p>这是一个使用Redis存储和管理外包公司列表的API服务。</p>
+    
+    <h2>可用端点</h2>
+    
+    <div class="endpoint">
+      <h3>获取公司列表</h3>
+      <p><code>GET /api/companies</code></p>
+      <p>返回所有外包公司的列表。</p>
+    </div>
+    
+    <div class="endpoint">
+      <h3>添加公司</h3>
+      <p><code>POST /api/add-company</code></p>
+      <p>添加新的外包公司到列表中。</p>
+    </div>
+    
+    <div class="endpoint">
+      <h3>健康检查</h3>
+      <p><code>GET /api/health</code></p>
+      <p>检查API服务的健康状态。</p>
+    </div>
+    
+    <p>有关API的更多信息，请参阅 <a href="https://github.com/yourusername/outsourcing-companies-api">GitHub仓库</a>。</p>
+  </div>
+</body>
+</html> 

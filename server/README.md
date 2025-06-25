@@ -93,10 +93,46 @@ POST /api/add-company
 npm run test-api
 ```
 
-## 部署
+## 部署到Vercel
+
+### 准备工作
+
+1. 确保您有一个Vercel账户并已安装Vercel CLI
+   ```bash
+   npm install -g vercel
+   ```
+
+2. 登录到Vercel CLI
+   ```bash
+   vercel login
+   ```
+
+### 部署步骤
+
+1. 配置Redis服务
+   - 在Vercel仪表板中，选择您的项目
+   - 前往"Settings" > "Environment Variables"
+   - 添加`REDIS_URL`环境变量，设置为您的Redis连接URL
+
+2. 部署项目
+   ```bash
+   vercel deploy --prod
+   ```
+
+### 解决部署问题
+
+如果遇到"No Output Directory named 'public' found"错误，请确保：
+
+1. 项目中存在`public`目录
+2. 已正确配置`vercel.json`文件
+3. `package.json`中包含`build`脚本
+
+## 测试Redis连接
+
+部署完成后，可以使用以下命令测试Redis连接：
 
 ```bash
-npm run deploy
+npm run test-redis
 ```
 
 ## Redis部署选项

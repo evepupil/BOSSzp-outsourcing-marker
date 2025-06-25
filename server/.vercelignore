@@ -1,0 +1,8 @@
+README.md
+.git
+.env.local
+node_modules
+.env
+.env.example
+CHANGELOG.md
+test-*.js 
