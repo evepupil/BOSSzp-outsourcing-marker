@@ -125,8 +125,7 @@ function addButtonToCompanyPage() {
   }
   
   // 获取公司名称
-  const companyName = companyNameElement.textContent.trim();
-  
+  const companyName = companyNameElement.firstChild.textContent.trim();
   // 创建按钮
   const addButton = document.createElement('button');
   addButton.className = 'add-outsourcing-btn';
