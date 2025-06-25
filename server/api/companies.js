@@ -20,9 +20,37 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 读取JSON文件
-    const jsonPath = path.join(process.cwd(), 'server/outsourcing-companies.json');
-    const data = fs.readFileSync(jsonPath, 'utf8');
+    // 读取JSON文件 - 尝试多种可能的路径
+    let data;
+    let jsonPath;
+    
+    // 尝试不同的路径
+    const possiblePaths = [
+      path.join(process.cwd(), 'outsourcing-companies.json'),
+      path.join(process.cwd(), 'server/outsourcing-companies.json'),
+      path.join(process.cwd(), '../outsourcing-companies.json')
+    ];
+    
+    // 尝试读取文件
+    for (const p of possiblePaths) {
+      try {
+        if (fs.existsSync(p)) {
+          jsonPath = p;
+          data = fs.readFileSync(jsonPath, 'utf8');
+          console.log(`成功从路径读取数据: ${jsonPath}`);
+          break;
+        }
+      } catch (e) {
+        console.log(`尝试路径失败: ${p}`);
+      }
+    }
+    
+    // 如果没有找到文件
+    if (!data) {
+      console.error('无法找到数据文件');
+      return res.status(500).json({ message: '数据文件不存在' });
+    }
+    
     const companies = JSON.parse(data);
     
     // 设置CORS头部

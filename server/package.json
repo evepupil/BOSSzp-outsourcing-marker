@@ -3,24 +3,23 @@
   "version": "1.0.0",
   "description": "API for retrieving outsourcing companies list",
   "main": "index.js",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
-    "start": "serverless offline start",
-    "deploy": "serverless deploy",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vercel dev",
+    "deploy": "vercel deploy --prod"
   },
   "keywords": [
-    "serverless",
-    "aws",
-    "lambda",
-    "api"
+    "vercel",
+    "api",
+    "serverless"
   ],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "fs": "0.0.1-security",
+    "path": "^0.12.7"
   },
   "devDependencies": {
-    "serverless": "^3.28.1",
-    "serverless-offline": "^13.3.2"
+    "vercel": "^32.5.0"
   }
 }
