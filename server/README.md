@@ -1,19 +1,19 @@
 # 外包公司API
 
-这是一个使用Vercel Edge Config存储和管理外包公司列表的API。
+这是一个使用Redis存储和管理外包公司列表的API。
 
 ## 功能
 
 - 获取外包公司列表
 - 添加新的外包公司
-- 使用Vercel Edge Config进行数据存储
+- 使用Redis进行数据存储
 
 ## 环境设置
 
 1. 复制`.env.example`文件为`.env.local`
-2. 在Vercel控制台创建一个Edge Config
-3. 更新`.env.local`文件中的`EDGE_CONFIG`值为您的Edge Config URL（格式：`https://edge-config.vercel.com/{configId}`）
-4. 在Vercel控制台生成一个具有写入权限的Token，并更新`.env.local`文件中的`EDGE_CONFIG_TOKEN`值
+2. 更新`.env.local`文件中的`REDIS_URL`值为您的Redis连接URL
+   - 本地开发可以使用: `redis://localhost:6379`
+   - 生产环境使用您的Redis服务提供商提供的URL
 
 ## 安装依赖
 
@@ -21,16 +21,16 @@
 npm install
 ```
 
-## 初始化Edge Config
+## 初始化Redis数据
 
 ```bash
-npm run init-edge-config
+npm run init-redis
 ```
 
 如需重置数据：
 
 ```bash
-npm run reset-edge-config
+npm run reset-redis
 ```
 
 ## 本地开发
@@ -52,13 +52,11 @@ GET /api/companies
 ```json
 {
   "outsourcing_companies": [
-    {
-      "name": "公司名称",
-      "contact": "联系人",
-      "phone": "联系电话"
-    }
+    "公司名称1",
+    "公司名称2",
+    "公司名称3"
   ],
-  "count": 1,
+  "count": 3,
   "updated_at": "2023-11-23T12:34:56.789Z"
 }
 ```
@@ -73,9 +71,7 @@ POST /api/add-company
 
 ```json
 {
-  "name": "公司名称",
-  "contact": "联系人",
-  "phone": "联系电话"
+  "companyName": "新公司名称"
 }
 ```
 
@@ -83,13 +79,9 @@ POST /api/add-company
 
 ```json
 {
-  "success": true,
   "message": "公司添加成功",
-  "company": {
-    "name": "公司名称",
-    "contact": "联系人",
-    "phone": "联系电话"
-  }
+  "company": "新公司名称",
+  "total": 4
 }
 ```
 
@@ -107,9 +99,24 @@ npm run test-api
 npm run deploy
 ```
 
+## Redis部署选项
+
+1. **Vercel集成的Redis**
+   - 通过Vercel集成Upstash或Redis Enterprise
+   - 自动配置环境变量
+
+2. **自托管Redis**
+   - 使用自己的Redis服务器
+   - 需要手动配置环境变量
+
+3. **云服务提供商**
+   - Redis Labs提供免费层
+   - AWS ElastiCache
+   - Azure Cache for Redis
+   - Google Cloud Memorystore
+
 ## 注意事项
 
-- Edge Config的`set`方法在某些环境中不可用，因此我们使用Vercel API进行数据写入
-- Vercel API的请求格式为：`https://api.vercel.com/v1/edge-config/{configId}/items`
-- 确保您的Edge Config Token具有足够的权限
-- 在生产环境中，应该添加适当的身份验证机制 
+- 确保您的Redis实例可以从Vercel服务器访问
+- 对于生产环境，建议使用带有密码保护的Redis实例
+- 在生产环境中，应该添加适当的身份验证机制保护API 

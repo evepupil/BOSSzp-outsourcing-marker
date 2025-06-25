@@ -1,4 +1,18 @@
-import { createClient } from '@vercel/edge-config';
+import { createClient } from 'redis';
+
+// Redis客户端实例
+let redisClient = null;
+
+// 获取Redis客户端实例
+async function getRedisClient() {
+  if (!redisClient) {
+    redisClient = createClient({
+      url: process.env.REDIS_URL || 'redis://localhost:6379'
+    });
+    await redisClient.connect();
+  }
+  return redisClient;
+}
 
 // Vercel API路由处理函数
 export default async function handler(req, res) {
@@ -20,6 +34,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: `不支持${req.method}方法` });
   }
   
+  let redis = null;
   try {
     // 验证请求体
     if (!req.body) {
@@ -36,58 +51,20 @@ export default async function handler(req, res) {
     // 清理公司名称
     const cleanCompanyName = companyName.trim();
     
-    // 检查环境变量
-    if (!process.env.EDGE_CONFIG) {
-      throw new Error('未配置EDGE_CONFIG环境变量');
-    }
-    
-    if (!process.env.EDGE_CONFIG_TOKEN) {
-      throw new Error('未配置EDGE_CONFIG_TOKEN环境变量');
-    }
-    
-    // 从环境变量中提取配置ID
-    const configUrl = process.env.EDGE_CONFIG;
-    if (!configUrl || !configUrl.includes('edge-config.vercel.com')) {
-      throw new Error('无效的Edge Config URL');
-    }
-    
-    const urlParts = configUrl.split('/');
-    const configId = urlParts[urlParts.length - 1];
-    
-    // 创建Edge Config客户端（仅用于读取）
-    const edgeConfig = createClient(process.env.EDGE_CONFIG);
+    // 连接到Redis
+    console.log('正在连接到Redis...');
+    redis = await getRedisClient();
     
     // 获取当前外包公司列表
+    console.log('获取现有公司列表...');
+    const companiesJson = await redis.get('outsourcing_companies');
     let outsourcingCompanies = [];
-    try {
-      outsourcingCompanies = await edgeConfig.get('outsourcing_companies') || [];
-      console.log('获取到现有公司列表:', outsourcingCompanies);
-    } catch (getError) {
-      console.error('获取公司列表失败:', getError);
-      
-      // 尝试通过API获取
-      try {
-        const getResponse = await fetch(
-          `https://api.vercel.com/v1/edge-config/${configId}/items?key=outsourcing_companies`,
-          {
-            headers: {
-              'Authorization': `Bearer ${process.env.EDGE_CONFIG_TOKEN}`
-            }
-          }
-        );
-        
-        if (getResponse.ok) {
-          const data = await getResponse.json();
-          if (data && Array.isArray(data.value)) {
-            outsourcingCompanies = data.value;
-            console.log('通过API获取到现有公司列表:', outsourcingCompanies);
-          }
-        } else {
-          console.log('API获取列表失败，使用空数组继续');
-        }
-      } catch (apiGetError) {
-        console.error('API获取列表失败:', apiGetError);
-      }
+    
+    if (companiesJson) {
+      outsourcingCompanies = JSON.parse(companiesJson);
+      console.log(`获取到${outsourcingCompanies.length}家现有公司`);
+    } else {
+      console.log('未找到现有公司列表，使用空数组');
     }
     
     // 检查公司是否已存在
@@ -101,34 +78,10 @@ export default async function handler(req, res) {
     // 按字母顺序排序（可选）
     updatedCompanies.sort();
     
-    // 通过Vercel API更新Edge Config
-    console.log('通过API更新Edge Config...');
-    const response = await fetch(
-      `https://api.vercel.com/v1/edge-config/${configId}/items`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${process.env.EDGE_CONFIG_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          items: [
-            {
-              operation: 'update',
-              key: 'outsourcing_companies',
-              value: updatedCompanies
-            }
-          ]
-        })
-      }
-    );
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API请求失败: ${response.status} - ${errorText}`);
-    }
-    
-    console.log('API更新成功');
+    // 更新Redis中的公司列表
+    console.log('正在更新Redis中的公司列表...');
+    await redis.set('outsourcing_companies', JSON.stringify(updatedCompanies));
+    console.log('Redis更新成功');
     
     // 返回成功响应
     return res.status(201).json({ 

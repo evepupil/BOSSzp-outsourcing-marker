@@ -1,4 +1,18 @@
-import { createClient } from '@vercel/edge-config';
+import { createClient } from 'redis';
+
+// Redis客户端实例
+let redisClient = null;
+
+// 获取Redis客户端实例
+async function getRedisClient() {
+  if (!redisClient) {
+    redisClient = createClient({
+      url: process.env.REDIS_URL || 'redis://localhost:6379'
+    });
+    await redisClient.connect();
+  }
+  return redisClient;
+}
 
 // Vercel API路由处理函数
 export default async function handler(req, res) {
@@ -17,68 +31,23 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: '不支持的请求方法' });
   }
 
+  let redis = null;
   try {
-    // 检查环境变量
-    if (!process.env.EDGE_CONFIG) {
-      console.error('错误: 未设置EDGE_CONFIG环境变量');
-      return res.status(500).json({ error: '服务器配置错误' });
-    }
-
-    console.log('正在尝试获取外包公司列表...');
+    // 连接到Redis
+    console.log('正在连接到Redis...');
+    redis = await getRedisClient();
     
-    // 创建Edge Config客户端
-    const edgeConfig = createClient(process.env.EDGE_CONFIG);
+    // 从Redis获取公司列表
+    console.log('正在获取外包公司列表...');
+    const companiesJson = await redis.get('outsourcing_companies');
     
-    // 尝试从Edge Config获取公司列表
+    // 解析公司列表
     let companies = [];
-    try {
-      companies = await edgeConfig.get('outsourcing_companies');
-      console.log(`成功从Edge Config获取了${companies ? companies.length : 0}家公司`);
-    } catch (edgeError) {
-      console.error('从Edge Config获取数据失败:', edgeError);
-      
-      // 如果Edge Config客户端失败，尝试使用API
-      if (process.env.EDGE_CONFIG_TOKEN) {
-        console.log('尝试通过API获取数据...');
-        try {
-          // 从环境变量中提取配置ID
-          const configUrl = process.env.EDGE_CONFIG;
-          if (!configUrl || !configUrl.includes('edge-config.vercel.com')) {
-            throw new Error('无效的Edge Config URL');
-          }
-          
-          const urlParts = configUrl.split('/');
-          const configId = urlParts[urlParts.length - 1];
-          
-          const response = await fetch(
-            `https://api.vercel.com/v1/edge-config/${configId}/items?key=outsourcing_companies`,
-            {
-              headers: {
-                'Authorization': `Bearer ${process.env.EDGE_CONFIG_TOKEN}`
-              }
-            }
-          );
-          
-          if (!response.ok) {
-            throw new Error(`API请求失败: ${response.status}`);
-          }
-          
-          const data = await response.json();
-          if (data && Array.isArray(data.value)) {
-            companies = data.value;
-            console.log(`成功通过API获取了${companies.length}家公司`);
-          } else {
-            console.log('API返回了无效数据:', data);
-            companies = [];
-          }
-        } catch (apiError) {
-          console.error('通过API获取数据失败:', apiError);
-          throw new Error('获取公司列表失败');
-        }
-      } else {
-        console.error('未设置EDGE_CONFIG_TOKEN，无法通过API获取数据');
-        throw new Error('获取公司列表失败');
-      }
+    if (companiesJson) {
+      companies = JSON.parse(companiesJson);
+      console.log(`成功获取了${companies.length}家公司`);
+    } else {
+      console.log('未找到公司列表，返回空数组');
     }
     
     // 确保companies是一个数组
