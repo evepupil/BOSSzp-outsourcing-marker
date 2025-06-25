@@ -8,7 +8,8 @@
     "dev": "vercel dev",
     "deploy": "vercel deploy --prod",
     "init-edge-config": "node scripts/init-edge-config.js",
-    "reset-edge-config": "node scripts/init-edge-config.js --reset"
+    "reset-edge-config": "node scripts/init-edge-config.js --reset",
+    "test-api": "node test-api.js"
   },
   "keywords": [
     "vercel",
@@ -21,6 +22,7 @@
     "@vercel/edge-config": "^0.4.1",
     "dotenv": "^16.3.1",
     "fs": "0.0.1-security",
+    "node-fetch": "^3.3.2",
     "path": "^0.12.7"
   },
   "devDependencies": {

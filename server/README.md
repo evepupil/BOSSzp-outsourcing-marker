@@ -1,70 +1,114 @@
-# 外包公司名单 API
+# 外包公司API
 
-这是一个基于AWS Lambda的Serverless API，用于获取外包公司名单。
+这是一个使用Vercel Edge Config存储和管理外包公司列表的API。
 
 ## 功能
 
-- 提供REST API接口获取外包公司名单
-- 使用JSON文件存储公司数据
-- 通过AWS Lambda和API Gateway实现Serverless架构
+- 获取外包公司列表
+- 添加新的外包公司
+- 使用Vercel Edge Config进行数据存储
 
-## 安装与部署
+## 环境设置
 
-### 前置条件
+1. 复制`.env.example`文件为`.env.local`
+2. 在Vercel控制台创建一个Edge Config
+3. 更新`.env.local`文件中的`EDGE_CONFIG`值为您的Edge Config URL（格式：`https://edge-config.vercel.com/{configId}`）
+4. 在Vercel控制台生成一个具有写入权限的Token，并更新`.env.local`文件中的`EDGE_CONFIG_TOKEN`值
 
-- Node.js 14.x 或更高版本
-- AWS账号及配置好的AWS CLI凭证
-- Serverless Framework
-
-### 安装依赖
+## 安装依赖
 
 ```bash
 npm install
 ```
 
-### 本地开发
+## 初始化Edge Config
 
 ```bash
-npm start
+npm run init-edge-config
 ```
 
-这将启动本地开发服务器，API将在 `http://localhost:3000/dev/companies` 可用。
+如需重置数据：
 
-### 部署到AWS
+```bash
+npm run reset-edge-config
+```
+
+## 本地开发
+
+```bash
+npm run dev
+```
+
+## API端点
+
+### 获取外包公司列表
+
+```
+GET /api/companies
+```
+
+响应示例：
+
+```json
+{
+  "outsourcing_companies": [
+    {
+      "name": "公司名称",
+      "contact": "联系人",
+      "phone": "联系电话"
+    }
+  ],
+  "count": 1,
+  "updated_at": "2023-11-23T12:34:56.789Z"
+}
+```
+
+### 添加外包公司
+
+```
+POST /api/add-company
+```
+
+请求体示例：
+
+```json
+{
+  "name": "公司名称",
+  "contact": "联系人",
+  "phone": "联系电话"
+}
+```
+
+响应示例：
+
+```json
+{
+  "success": true,
+  "message": "公司添加成功",
+  "company": {
+    "name": "公司名称",
+    "contact": "联系人",
+    "phone": "联系电话"
+  }
+}
+```
+
+## 测试API
+
+确保已经设置了正确的环境变量，并且本地服务器正在运行，然后执行：
+
+```bash
+npm run test-api
+```
+
+## 部署
 
 ```bash
 npm run deploy
 ```
 
-或指定环境：
+## 注意事项
 
-```bash
-serverless deploy --stage production
-```
-
-## API 端点
-
-### 获取外包公司名单
-
-- **URL**: `/companies`
-- **方法**: `GET`
-- **响应示例**:
-  ```json
-  {
-    "companies": [
-      {
-        "id": 1,
-        "name": "华为技术服务有限公司",
-        "type": "IT外包",
-        "location": "深圳",
-        "description": "提供IT基础设施和应用开发服务"
-      },
-      // 更多公司...
-    ],
-    "lastUpdated": "2023-08-15T08:00:00Z"
-  }
-  ```
-
-## 数据更新
-
-要更新公司名单，请直接编辑 `outsourcing-companies.json` 文件，然后重新部署。 
+- Edge Config的`set`方法在某些环境中不可用，因此我们使用Vercel API进行数据写入
+- 确保您的Edge Config Token具有足够的权限
+- 在生产环境中，应该添加适当的身份验证机制 
