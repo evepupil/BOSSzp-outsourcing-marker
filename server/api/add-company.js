@@ -1,45 +1,4 @@
-import fs from 'fs';
-import path from 'path';
-
-// 查找并获取数据文件路径
-async function findDataFilePath() {
-  const possiblePaths = [
-    path.join(process.cwd(), 'outsourcing-companies.json'),
-    path.join(process.cwd(), 'server/outsourcing-companies.json'),
-    path.join(process.cwd(), '../outsourcing-companies.json')
-  ];
-  
-  for (const p of possiblePaths) {
-    try {
-      if (fs.existsSync(p)) {
-        return p;
-      }
-    } catch (e) {
-      console.log(`尝试路径失败: ${p}`);
-    }
-  }
-  
-  return null;
-}
-
-// 读取公司数据
-async function readCompaniesData() {
-  const filePath = await findDataFilePath();
-  if (!filePath) {
-    throw new Error('数据文件不存在');
-  }
-  
-  const data = fs.readFileSync(filePath, 'utf8');
-  return { 
-    filePath, 
-    data: JSON.parse(data) 
-  };
-}
-
-// 写入公司数据
-async function writeCompaniesData(filePath, data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
-}
+import { createClient } from '@vercel/edge-config';
 
 // Vercel API路由处理函数
 export default async function handler(req, res) {
@@ -77,28 +36,31 @@ export default async function handler(req, res) {
     // 清理公司名称
     const cleanCompanyName = companyName.trim();
     
-    // 读取当前数据
-    const { filePath, data } = await readCompaniesData();
+    // 创建Edge Config客户端
+    const edgeConfig = createClient(process.env.EDGE_CONFIG);
+    
+    // 获取当前外包公司列表
+    const outsourcingCompanies = await edgeConfig.get('outsourcing_companies') || [];
     
     // 检查公司是否已存在
-    if (data.outsourcing_companies.includes(cleanCompanyName)) {
+    if (outsourcingCompanies.includes(cleanCompanyName)) {
       return res.status(409).json({ message: '该公司已存在于列表中' });
     }
     
     // 添加新公司
-    data.outsourcing_companies.push(cleanCompanyName);
+    const updatedCompanies = [...outsourcingCompanies, cleanCompanyName];
     
     // 按字母顺序排序（可选）
-    data.outsourcing_companies.sort();
+    updatedCompanies.sort();
     
-    // 写入文件
-    await writeCompaniesData(filePath, data);
+    // 更新Edge Config
+    await edgeConfig.set('outsourcing_companies', updatedCompanies);
     
     // 返回成功响应
     return res.status(201).json({ 
       message: '公司添加成功',
       company: cleanCompanyName,
-      total: data.outsourcing_companies.length
+      total: updatedCompanies.length
     });
     
   } catch (error) {
