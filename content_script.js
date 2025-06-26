@@ -4,25 +4,77 @@ let isMarkingEnabled = true; // 默认启用标记功能
 let outsourcingCompaniesList = []; // 缓存外包公司列表
 let observer = null; // MutationObserver 实例
 
-// 异步函数：从 config.json 文件中获取外包公司列表
+// 缓存相关常量
+const CACHE_KEY = 'outsourcingCompaniesCache';
+const CACHE_EXPIRY_KEY = 'outsourcingCompaniesCacheExpiry';
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 缓存有效期：24小时（毫秒）
+
+// 异步函数：从缓存中获取外包公司列表
+async function getCompaniesFromCache() {
+  return new Promise(resolve => {
+    chrome.storage.local.get([CACHE_KEY, CACHE_EXPIRY_KEY], (result) => {
+      const cachedData = result[CACHE_KEY];
+      const cacheExpiry = result[CACHE_EXPIRY_KEY] || 0;
+      const now = Date.now();
+      
+      // 检查缓存是否存在且未过期
+      if (cachedData && cacheExpiry > now) {
+        console.log('从缓存加载外包公司列表，剩余有效期：', Math.round((cacheExpiry - now) / 60000), '分钟');
+        resolve(cachedData);
+      } else {
+        console.log('缓存不存在或已过期');
+        resolve(null);
+      }
+    });
+  });
+}
+
+// 异步函数：将外包公司列表保存到缓存
+async function saveCompaniesToCache(companies) {
+  const expiry = Date.now() + CACHE_DURATION;
+  return new Promise(resolve => {
+    chrome.storage.local.set({
+      [CACHE_KEY]: companies,
+      [CACHE_EXPIRY_KEY]: expiry
+    }, () => {
+      console.log('外包公司列表已缓存，有效期至：', new Date(expiry).toLocaleString());
+      resolve();
+    });
+  });
+}
+
+// 异步函数：从 API 获取外包公司列表
 async function fetchConfigInternal() {
   try {
-    // 从服务器API获取外包公司列表
+    // 首先尝试从缓存获取
+    const cachedCompanies = await getCompaniesFromCache();
+    if (cachedCompanies) {
+      outsourcingCompaniesList = cachedCompanies;
+      return cachedCompanies;
+    }
+    
+    // 如果缓存不存在或已过期，则从服务器API获取
+    console.log('从API获取外包公司列表...');
     const response = await fetch('https://boss.chaosyn.com/companies');
+    
     // 检查请求是否成功
     if (!response.ok) {
       console.error('获取外包公司名单失败:', response.statusText);
       return []; // 请求失败则返回空数组
     }
+    
     // 解析 JSON 数据
-    console.log('API响应:', response);
-
     const config = await response.json();
     console.log('获取到的数据:', config);
     
-    // 存储到全局变量并返回
-    outsourcingCompaniesList = config.outsourcing_companies || [];
-    return outsourcingCompaniesList;
+    // 存储到全局变量
+    const companies = config.outsourcing_companies || [];
+    outsourcingCompaniesList = companies;
+    
+    // 保存到缓存
+    await saveCompaniesToCache(companies);
+    
+    return companies;
   } catch (error) {
     console.error('获取或解析外包公司数据时发生错误:', error);
     return []; // 发生错误则返回空数组
@@ -47,6 +99,8 @@ async function addCompanyToOutsourcingList(companyName) {
       // 更新缓存的列表
       if (!outsourcingCompaniesList.includes(companyName)) {
         outsourcingCompaniesList.push(companyName);
+        // 更新缓存
+        await saveCompaniesToCache(outsourcingCompaniesList);
       }
       return true;
     } else {
@@ -334,7 +388,7 @@ async function main() {
   // console.log('标记功能已启用。');
   // 获取外包公司列表
   if (outsourcingCompaniesList.length === 0) { // 仅当列表为空时才获取
-    await fetchConfigInternal();
+    await fetchConfigInternal(); // 这个函数现在会先检查缓存
   }
   
   // 如果外包公司列表不为空
@@ -360,7 +414,7 @@ async function main() {
     // 配置观察器：监听 document.body 及其所有子节点的 childList 和 subtree 变化
     observer.observe(document.body, { childList: true, subtree: true });
   } else {
-    // console.log('外包公司列表为空，将不进行任何标记。');
+    console.log('外包公司列表为空，将不进行任何标记。');
   }
 }
   
@@ -383,6 +437,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       removeOutsourcingMarks(); // 移除所有标记
     }
     sendResponse({ status: 'success', enabled: isMarkingEnabled });
+  } else if (request.action === 'refreshCompanies') {
+    // 强制刷新公司列表
+    console.log('收到刷新外包公司列表的请求');
+    // 重置列表
+    outsourcingCompaniesList = [];
+    // 重新获取数据并标记
+    fetchConfigInternal().then(() => {
+      if (isMarkingEnabled && outsourcingCompaniesList.length > 0) {
+        // 先移除现有标记
+        removeOutsourcingMarks();
+        // 重新标记
+        markOutsourcingCompanies();
+      }
+      sendResponse({ status: 'success', count: outsourcingCompaniesList.length });
+    }).catch(error => {
+      console.error('刷新外包公司列表时发生错误:', error);
+      sendResponse({ status: 'error', message: error.message });
+    });
   }
   return true; // Indicates that the response is sent asynchronously
 });

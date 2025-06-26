@@ -6,14 +6,45 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      width: 250px;
+      width: 280px;
       padding: 10px;
     }
     h3 {
       color: #333;
+      margin-top: 0;
     }
     p {
       font-size: 14px;
+      margin: 8px 0;
+    }
+    .control-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 12px 0;
+      padding: 8px 0;
+      border-top: 1px solid #eee;
+    }
+    button {
+      background-color: #5dd5c8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background-color: #4cc0b3;
+    }
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    #cacheStatus {
+      font-size: 12px;
+      color: #666;
+      margin-top: 8px;
     }
   </style>
 </head>
@@ -23,10 +54,15 @@
   <p>外包公司列表在文件中静态维护，以后会支持实时更新以及个人标记功能。</p>
   <p>如果您有任何问题或建议，请在GitHub上提交issue。</p>    
   <p>https://github.com/evepupil/BOSSzp-outsourcing-marker</p>
-  <div>
+  <div class="control-group">
     <label for="toggleSwitch">启用外包标记:</label>
     <input type="checkbox" id="toggleSwitch" checked>
   </div>
+  <div class="control-group">
+    <span>外包公司数据:</span>
+    <button id="refreshCache">刷新数据</button>
+  </div>
+  <div id="cacheStatus">加载中...</div>
   <script src="popup.js"></script>
 </body>
 </html>
