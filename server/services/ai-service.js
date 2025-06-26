@@ -1,6 +1,10 @@
 import OpenAI from 'openai';
+import dotenv from 'dotenv';
 import aiConfig from '../config/ai-config.js';
 import promptTemplates from '../config/prompt-templates.js';
+
+// 加载环境变量（确保在导入配置前加载）
+dotenv.config({ path: '.env.local' });
 
 /**
  * AI服务类 - 处理与DeepSeek API的交互
@@ -11,6 +15,7 @@ class AIService {
    * @param {Object} config - 配置项
    * @param {string} config.baseUrl - API基础URL
    * @param {string} config.model - 使用的模型名称
+   * @param {number} config.temperature - 温度参数，控制创造性
    * @param {string} config.hySource - 来源标识
    * @param {string} config.hyUser - 用户标识
    * @param {string} config.hyToken - 认证令牌
@@ -40,6 +45,16 @@ class AIService {
     
     // 提示词模板
     this.promptTemplates = promptTemplates;
+    
+    // 输出初始化信息
+    console.log('AI服务初始化完成:', {
+      baseUrl: this.baseUrl,
+      model: this.model,
+      hySource: this.hySource,
+      hyUser: this.hyUser ? '已设置' : '未设置',
+      hyToken: this.hyToken ? '已设置' : '未设置',
+      agentId: this.agentId
+    });
   }
 
   /**
@@ -71,20 +86,20 @@ class AIService {
    */
   async streamCompletion(messages, onChunk) {
     try {
+      console.log(`发送请求到 ${this.baseUrl}，模型: ${this.model}`);
+      
       // 调用API
       const response = await this.client.chat.completions.create({
         model: this.model,
         messages: messages,
         temperature: this.temperature,
         stream: true,
-        extra_body: {
-          hy_source: this.hySource,
-          hy_user: this.hyUser,
-          hy_token: this.hyToken,
-          agent_id: this.agentId,
-          chat_id: this.chatId,
-          should_remove_conversation: false,
-        },
+        hy_source: this.hySource,
+        hy_user: this.hyUser,
+        hy_token: this.hyToken,
+        agent_id: this.agentId,
+        chat_id: this.chatId,
+        should_remove_conversation: false,
       });
 
       // 拼接流式响应
@@ -119,21 +134,24 @@ class AIService {
    */
   async completion(messages) {
     try {
+      console.log(`发送请求到 ${this.baseUrl}，模型: ${this.model}`);
+      console.log('请求消息:', JSON.stringify(messages));
+      
       const response = await this.client.chat.completions.create({
         model: this.model,
         messages: messages,
         temperature: this.temperature,
-        extra_body: {
-          hy_source: this.hySource,
-          hy_user: this.hyUser,
-          hy_token: this.hyToken,
-          agent_id: this.agentId,
-          chat_id: this.chatId,
-          should_remove_conversation: false,
-        },
+        stream:true,
+        hy_source: this.hySource,
+        hy_user: this.hyUser,
+        hy_token: this.hyToken,
+        agent_id: this.agentId,
+        chat_id: this.chatId,
+        should_remove_conversation: false,
       });
-
-      return response.choices[0].message.content.replace(/\[text\]/g, '');
+      const result = response.choices[0].message.content.replace(/\[text\]/g, '');
+      console.log('AI响应:', result);
+      return result;
     } catch (error) {
       console.error('AI请求错误:', error);
       throw error;

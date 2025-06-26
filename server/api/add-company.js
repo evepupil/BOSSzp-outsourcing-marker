@@ -1,4 +1,9 @@
 import { createClient } from 'redis';
+import AIService from '../services/ai-service.js';
+import dotenv from 'dotenv';
+
+// 加载环境变量
+dotenv.config({ path: '.env.local' });
 
 // Redis客户端实例
 let redisClient = null;
@@ -13,6 +18,9 @@ async function getRedisClient() {
   }
   return redisClient;
 }
+
+// 创建AI服务实例
+const aiService = new AIService();
 
 // Vercel API路由处理函数
 export default async function handler(req, res) {
@@ -70,6 +78,36 @@ export default async function handler(req, res) {
     // 检查公司是否已存在
     if (outsourcingCompanies.includes(cleanCompanyName)) {
       return res.status(409).json({ message: '该公司已存在于列表中' });
+    }
+    
+    // 使用AI判断是否为外包公司
+    console.log(`正在使用AI判断 "${cleanCompanyName}" 是否为外包公司...`);
+    try {
+      // 使用提示词模板
+      const aiResponse = await aiService.streamCompletion([
+        { 
+          role: 'user', 
+          content: aiService.getPrompt('outsourcing', { query: cleanCompanyName }) 
+        }
+      ]);
+      
+      console.log(`AI判断结果: ${aiResponse}`);
+      
+      // 解析AI响应
+      const isOutsourcing = aiResponse.toLowerCase().includes('true');
+      
+      if (!isOutsourcing) {
+        return res.status(400).json({ 
+          message: 'AI识别该公司不是外包公司，如有疑问请在git上提交issue', 
+          aiResponse: aiResponse
+        });
+      }
+      
+      console.log(`AI确认 "${cleanCompanyName}" 为外包公司，继续添加...`);
+    } catch (aiError) {
+      console.error('AI判断出错:', aiError);
+      // AI判断失败时，记录错误但继续添加公司
+      console.log('由于AI判断失败，将跳过验证继续添加公司');
     }
     
     // 添加新公司

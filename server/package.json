@@ -11,7 +11,8 @@
     "init-edge-config": "node scripts/init-edge-config.js",
     "reset-edge-config": "node scripts/init-edge-config.js --reset",
     "init-redis": "node scripts/init-redis-companies.js",
-    "reset-redis": "node scripts/init-redis-companies.js --reset"
+    "reset-redis": "node scripts/init-redis-companies.js --reset",
+    "test-ai": "node test-ai-validation.js"
   },
   "keywords": [
     "vercel",
@@ -25,6 +26,7 @@
     "dotenv": "^16.3.1",
     "fs": "0.0.1-security",
     "node-fetch": "^3.3.2",
+    "openai": "^4.20.1",
     "path": "^0.12.7",
     "redis": "^4.6.10"
   },
