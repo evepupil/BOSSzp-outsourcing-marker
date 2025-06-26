@@ -105,9 +105,11 @@ export default async function handler(req, res) {
       
       console.log(`AI确认 "${cleanCompanyName}" 为外包公司，继续添加...`);
     } catch (aiError) {
-      console.error('AI判断出错:', aiError);
-      // AI判断失败时，记录错误但继续添加公司
-      console.log('由于AI判断失败，将跳过验证继续添加公司');
+      console.error('AI内部错误:', aiError);
+      return res.status(500).json({ 
+        message: 'AI内部错误，如有疑问请在git上提交issue', 
+        aiError: aiError
+      });
     }
     
     // 添加新公司
